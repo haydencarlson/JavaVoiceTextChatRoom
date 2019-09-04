@@ -28,11 +28,9 @@ public class Client extends JFrame {
 		userMessage = new JTextField();
 		userMessage.setEditable(false);
 		userMessage.addActionListener(
-			new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					sendMessage(e.getActionCommand());
-					userMessage.setText("");
-				}
+			e -> {
+				sendMessage(e.getActionCommand());
+				userMessage.setText("");
 			}
 		);
 		TopBar topbar = new TopBar(this);
@@ -121,21 +119,13 @@ public class Client extends JFrame {
 
 	private void showMessage(final String message) {
 		SwingUtilities.invokeLater(
-			new Runnable() {
-				public void run() {
-					userMessages.append(message);
-				}
-			}
+			() -> userMessages.append(message)
 		);
 	}
 
 	private void fieldEditable(JTextField field, final boolean ableToType) {
 		SwingUtilities.invokeLater(
-			new Runnable() {
-				public void run() {
-					field.setEditable(ableToType);
-				}
-			}
+			() -> field.setEditable(ableToType)
 		);
 	}
 

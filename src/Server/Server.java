@@ -49,11 +49,7 @@ public class Server extends JFrame {
 
 	public void showMessage(final String message) {
     	SwingUtilities.invokeLater(
-		    new Runnable() {
-			    public void run() {
-				    userMessages.append(message);
-			    }
-		    }
+		    () -> userMessages.append(message)
 	    );
 	}
 
