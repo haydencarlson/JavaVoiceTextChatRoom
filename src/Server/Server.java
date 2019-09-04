@@ -14,7 +14,7 @@ public class Server extends JFrame {
     private Socket connection;
 
     public Server() {
-        super("DIY Instant Messenger");
+	    super("DIY Instant Messenger");
 	    setupUI();
     }
 
@@ -41,17 +41,15 @@ public class Server extends JFrame {
 	}
 
 	private void acceptNewConnections() throws IOException {
-    	connection = server.accept();
-    	showMessage("\n User connected: " + connection.getInetAddress().getHostName());
-    	ServerWorker worker = new ServerWorker(connection, output, input, this);
-    	worker.start();
+	    connection = server.accept();
+	    showMessage("\n User connected: " + connection.getInetAddress().getHostName());
+	    ServerWorker worker = new ServerWorker(connection, output, input, this);
+	    worker.start();
 	}
 
 	public void showMessage(final String message) {
-    	SwingUtilities.invokeLater(
+	    SwingUtilities.invokeLater(
 		    () -> userMessages.append(message)
 	    );
 	}
-
-
 }
