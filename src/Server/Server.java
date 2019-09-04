@@ -26,7 +26,7 @@ public class Server extends JFrame {
 	}
 
 	public void start() {
-    	try {
+	    try {
 			server = new ServerSocket(3000, 100);
 			while(true) {
 				try {
