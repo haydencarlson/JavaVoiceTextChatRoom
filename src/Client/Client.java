@@ -52,20 +52,8 @@ public class Client extends JFrame {
 	public void start() {
 		try {
 			connectToServer();
-			whileChatting();
-			System.out.println(connection);
-		} catch (EOFException e) {
-			showMessage("\n Client connection closed");
 		} catch (IOException e) {
-			// Retry connection to server
-			fieldEditable(userMessage, false);
-			retryAttempts += 1;
-			if (retryAttempts == 5) {
-				showMessage("\n Unable to connect at this time");
-				terminate();
-			} else {
-				this.start();
-			}
+			showMessage("\n Unable to connect at this time");
 		}
 	}
 
@@ -80,10 +68,15 @@ public class Client extends JFrame {
 		connection = new MulticastSocket(3000);
 		connection.joinGroup(address);
 		showMessage("You are now connected! Say Hi.");
+		fieldEditable(userMessage, true);
 
-		// Start thread that handles setting up sending
-//		Thread captureWorker = new ClientWorker(connection);
-//		captureWorker.start();
+		// Start thread that handles setting up receiving messages
+		Thread messageReceiverWorker = new MessageReceiverWorker(connection, this, address);
+		messageReceiverWorker.start();
+
+		// Start thread that handles sending audio
+		Thread audioSenderWorker = new AudioSenderWorker(connection, this, address);
+		audioSenderWorker.start();
 	}
 
 	private void whileChatting () throws IOException {
@@ -126,7 +119,7 @@ public class Client extends JFrame {
 		}
 	}
 
-	private void showMessage(final String message) {
+	public void showMessage(final String message) {
 		SwingUtilities.invokeLater(
 			() -> userMessages.append(message)
 		);
