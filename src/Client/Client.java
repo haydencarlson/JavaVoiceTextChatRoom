@@ -4,17 +4,24 @@ import java.io.*;
 import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.Buffer;
+import javax.sound.sampled.*;
 import javax.swing.*;
 
 public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
 	private String username;
+	private byte[] userMessageBuffer;
 	private ObjectOutputStream output;
 	private ObjectInputStream input;
 	private String message;
 	private String serverIP;
-	private Socket connection;
+	private InetAddress address;
+	private DatagramSocket connection;
+	private AudioFormat audioFormat;
+	private TargetDataLine targetDataLine;
+	private SourceDataLine sourceDataLine;
 	private int retryAttempts = 0;
 
 	public Client(String host) {
@@ -45,8 +52,8 @@ public class Client extends JFrame {
 	public void start() {
 		try {
 			connectToServer();
-			setupStreams();
 			whileChatting();
+			System.out.println(connection);
 		} catch (EOFException e) {
 			showMessage("\n Client connection closed");
 		} catch (IOException e) {
@@ -67,25 +74,25 @@ public class Client extends JFrame {
 	}
 
 	private void connectToServer() throws IOException {
-		connection = new Socket(InetAddress.getByName(serverIP), 3000);
-		showMessage("You are now connected! Say Hi.");
-	}
 
-	private void setupStreams() throws IOException {
-		output = new ObjectOutputStream(connection.getOutputStream());
-		output.flush();
-		input = new ObjectInputStream(connection.getInputStream());
+		// Connect to datagramsocket socket and join group
+		address = InetAddress.getByName(serverIP);
+		connection = new DatagramSocket();
+		showMessage("You are now connected! Say Hi.");
+
+		// Start thread that handles setting up sending
+		Thread captureWorker = new ClientWorker(connection);
+		captureWorker.start();
 	}
 
 	private void whileChatting () throws IOException {
 		fieldEditable(userMessage, true);
+		byte[] buf = new byte[1000];
+		DatagramPacket dp = new DatagramPacket(buf, buf.length);
 		do {
-			try {
-				message = (String) input.readObject();
-				showMessage("\n" + message);
-			} catch(ClassNotFoundException e) {
-				showMessage("Error reading message");
-			}
+			connection.receive(dp);
+			message = new String(dp.getData());
+			showMessage("\n" + message);
 		} while(!message.equals("SERVER - END"));
 	}
 
@@ -108,10 +115,11 @@ public class Client extends JFrame {
 
 	private void sendMessage(String message) {
 		try {
-			String concatMessage = username + " : " + message;
-			output.writeObject(concatMessage);
-			output.flush();
-			showMessage("\n" + concatMessage);
+			byte[] userMessageBuffer = new byte[1000];
+			userMessageBuffer = message.getBytes();
+			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, address, 3000);
+			connection.send(packet);
+
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}

@@ -1,48 +1,47 @@
 package Server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import com.sun.org.apache.xpath.internal.operations.Mult;
+
+import javax.xml.crypto.Data;
+import java.io.*;
+import java.net.*;
 
 public class ServerWorker extends Thread {
-	private final Socket clientConnection;
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
+	private final DatagramSocket connection;
+	private InetAddress address;
 	private Server server;
+	private byte[] buffer;
 	private String message;
 
-	public ServerWorker(Socket clientConnection, ObjectOutputStream output, ObjectInputStream input, Server server) {
-		this.clientConnection = clientConnection;
-		this.output = output;
-		this.input = input;
+	public ServerWorker(DatagramSocket socket, InetAddress address, Server server) {
+		this.connection = socket;
 		this.server = server;
 	}
 
 	@Override
 	public void run() {
 		try {
-			setupStreams();
 			whileChatting();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void setupStreams() throws IOException {
-		output = new ObjectOutputStream(clientConnection.getOutputStream());
-		output.flush();
-		input = new ObjectInputStream(clientConnection.getInputStream());
-	}
-
 	private void whileChatting() throws IOException {
-		do {
-			try {
-				message = (String) input.readObject();
-				this.server.showMessage("\n" + message);
-			} catch(ClassNotFoundException classNotFoundException) {
-				this.server.showMessage("\n Error receiving message");
-			}
-		} while(!message.equals("CLIENT - END"));
+		byte[] buffer = new byte[1000];
+		DatagramPacket receive_packet = new DatagramPacket(buffer, buffer.length);
+		while (true) {
+
+			// Receive new packets
+			connection.receive(receive_packet);
+			message = new String(receive_packet.getData());
+
+			// Send packet out
+			buffer = message.getBytes();
+			DatagramPacket send_packet = new DatagramPacket(buffer, buffer.length, receive_packet.getAddress(), receive_packet.getPort());
+			connection.send(send_packet);
+
+			this.server.showMessage("\n" + message);
+		}
 	}
 }

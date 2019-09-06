@@ -1,15 +1,17 @@
 package Server;
 
+import com.sun.org.apache.xpath.internal.operations.Mult;
+
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
 
 public class Server extends JFrame {
     private JTextArea userMessages;
+    private InetAddress address;
     private ObjectOutputStream output;
     private ObjectInputStream input;
-    private ServerSocket server;
-    private Socket connection;
+    private DatagramSocket connection;
 
     public Server() {
         super("DIY Instant Messenger");
@@ -25,7 +27,9 @@ public class Server extends JFrame {
 
     public void start() {
         try {
-            server = new ServerSocket(3000, 100);
+            address = InetAddress.getByName("localhost");
+            connection = new DatagramSocket(3000, address);
+            showMessage("Server has started on: " + connection.getLocalSocketAddress());
             while(true) {
                 try {
                     acceptNewConnections();
@@ -39,9 +43,7 @@ public class Server extends JFrame {
     }
 
     private void acceptNewConnections() throws IOException {
-        connection = server.accept();
-        showMessage("\n User connected: " + connection.getInetAddress().getHostName());
-        ServerWorker worker = new ServerWorker(connection, output, input, this);
+        ServerWorker worker = new ServerWorker(connection, address, this);
         worker.start();
     }
 
