@@ -18,7 +18,7 @@ public class Client extends JFrame {
 	private String message;
 	private String serverIP;
 	private InetAddress address;
-	private DatagramSocket connection;
+	private MulticastSocket connection;
 	private AudioFormat audioFormat;
 	private TargetDataLine targetDataLine;
 	private SourceDataLine sourceDataLine;
@@ -77,19 +77,20 @@ public class Client extends JFrame {
 
 		// Connect to datagramsocket socket and join group
 		address = InetAddress.getByName(serverIP);
-		connection = new DatagramSocket();
+		connection = new MulticastSocket(3000);
+		connection.joinGroup(address);
 		showMessage("You are now connected! Say Hi.");
 
 		// Start thread that handles setting up sending
-		Thread captureWorker = new ClientWorker(connection);
-		captureWorker.start();
+//		Thread captureWorker = new ClientWorker(connection);
+//		captureWorker.start();
 	}
 
 	private void whileChatting () throws IOException {
 		fieldEditable(userMessage, true);
-		byte[] buf = new byte[1000];
-		DatagramPacket dp = new DatagramPacket(buf, buf.length);
 		do {
+			byte[] buf = new byte[1000];
+			DatagramPacket dp = new DatagramPacket(buf, buf.length);
 			connection.receive(dp);
 			message = new String(dp.getData());
 			showMessage("\n" + message);
