@@ -1,7 +1,5 @@
 package Server;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
-
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
@@ -11,7 +9,7 @@ public class Server extends JFrame {
     private InetAddress address;
     private ObjectOutputStream output;
     private ObjectInputStream input;
-    private DatagramSocket connection;
+    private MulticastSocket connection;
 
     public Server() {
         super("DIY Instant Messenger");
@@ -27,16 +25,12 @@ public class Server extends JFrame {
 
     public void start() {
         try {
-            address = InetAddress.getByName("localhost");
-            connection = new DatagramSocket(3000, address);
+            address = InetAddress.getByName("224.0.0.1");
+            connection = new MulticastSocket(3000);
+            connection.setReuseAddress(true);
+            connection.joinGroup(address);
             showMessage("Server has started on: " + connection.getLocalSocketAddress());
-            while(true) {
-                try {
-                    acceptNewConnections();
-                } catch(EOFException e) {
-                    showMessage("\n Server connection has been terminated");
-                }
-            }
+            acceptNewConnections();
         } catch(IOException e) {
             e.printStackTrace();
         }

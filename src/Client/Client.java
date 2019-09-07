@@ -12,17 +12,10 @@ public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
 	private String username;
-	private byte[] userMessageBuffer;
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
 	private String message;
 	private String serverIP;
 	private InetAddress address;
-	private DatagramSocket connection;
-	private AudioFormat audioFormat;
-	private TargetDataLine targetDataLine;
-	private SourceDataLine sourceDataLine;
-	private int retryAttempts = 0;
+	private MulticastSocket connection;
 
 	public Client(String host) {
 		super("DIY Messenger Client");
@@ -52,20 +45,8 @@ public class Client extends JFrame {
 	public void start() {
 		try {
 			connectToServer();
-			whileChatting();
-			System.out.println(connection);
-		} catch (EOFException e) {
-			showMessage("\n Client connection closed");
 		} catch (IOException e) {
-			// Retry connection to server
-			fieldEditable(userMessage, false);
-			retryAttempts += 1;
-			if (retryAttempts == 5) {
-				showMessage("\n Unable to connect at this time");
-				terminate();
-			} else {
-				this.start();
-			}
+			showMessage("\n Unable to connect at this time");
 		}
 	}
 
@@ -75,42 +56,20 @@ public class Client extends JFrame {
 
 	private void connectToServer() throws IOException {
 
-		// Connect to datagramsocket socket and join group
+		// Connect to multicast socket and join group
 		address = InetAddress.getByName(serverIP);
-		connection = new DatagramSocket();
+		connection = new MulticastSocket();
+		connection.joinGroup(address);
 		showMessage("You are now connected! Say Hi.");
-
-		// Start thread that handles setting up sending
-		Thread captureWorker = new ClientWorker(connection);
-		captureWorker.start();
-	}
-
-	private void whileChatting () throws IOException {
 		fieldEditable(userMessage, true);
-		byte[] buf = new byte[1000];
-		DatagramPacket dp = new DatagramPacket(buf, buf.length);
-		do {
-			connection.receive(dp);
-			message = new String(dp.getData());
-			showMessage("\n" + message);
-		} while(!message.equals("SERVER - END"));
-	}
 
-	private void terminate() {
-		fieldEditable(userMessage, false);
-		try {
-			if (output != null) {
-				output.close();
-			}
-			if (input != null) {
-				input.close();
-			}
-			if (connection != null) {
-				connection.close();
-			}
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		// Start thread that handles setting up receiving messages
+		Thread messageReceiverWorker = new MessageReceiverWorker(connection, this, address);
+		messageReceiverWorker.start();
+
+		// Start thread that handles sending audio
+		Thread audioSenderWorker = new AudioSenderWorker(connection, this, address);
+		audioSenderWorker.start();
 	}
 
 	private void sendMessage(String message) {
@@ -119,13 +78,12 @@ public class Client extends JFrame {
 			userMessageBuffer = message.getBytes();
 			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, address, 3000);
 			connection.send(packet);
-
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}
 	}
 
-	private void showMessage(final String message) {
+	public void showMessage(final String message) {
 		SwingUtilities.invokeLater(
 			() -> userMessages.append(message)
 		);
