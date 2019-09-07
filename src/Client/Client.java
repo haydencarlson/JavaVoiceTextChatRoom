@@ -79,17 +79,6 @@ public class Client extends JFrame {
 		audioSenderWorker.start();
 	}
 
-	private void whileChatting () throws IOException {
-		fieldEditable(userMessage, true);
-		do {
-			byte[] buf = new byte[1000];
-			DatagramPacket dp = new DatagramPacket(buf, buf.length);
-			connection.receive(dp);
-			message = new String(dp.getData());
-			showMessage("\n" + message);
-		} while(!message.equals("SERVER - END"));
-	}
-
 	private void terminate() {
 		fieldEditable(userMessage, false);
 		try {
@@ -113,7 +102,6 @@ public class Client extends JFrame {
 			userMessageBuffer = message.getBytes();
 			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, address, 3000);
 			connection.send(packet);
-
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}
