@@ -63,9 +63,9 @@ public class Client extends JFrame {
 
 	private void connectToServer() throws IOException {
 
-		// Connect to datagramsocket socket and join group
+		// Connect to multicast socket and join group
 		address = InetAddress.getByName(serverIP);
-		connection = new MulticastSocket(3000);
+		connection = new MulticastSocket();
 		connection.joinGroup(address);
 		showMessage("You are now connected! Say Hi.");
 		fieldEditable(userMessage, true);
@@ -77,23 +77,6 @@ public class Client extends JFrame {
 		// Start thread that handles sending audio
 		Thread audioSenderWorker = new AudioSenderWorker(connection, this, address);
 		audioSenderWorker.start();
-	}
-
-	private void terminate() {
-		fieldEditable(userMessage, false);
-		try {
-			if (output != null) {
-				output.close();
-			}
-			if (input != null) {
-				input.close();
-			}
-			if (connection != null) {
-				connection.close();
-			}
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void sendMessage(String message) {
