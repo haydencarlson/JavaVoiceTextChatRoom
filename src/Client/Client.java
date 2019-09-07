@@ -3,9 +3,6 @@ package Client;
 import java.io.*;
 import java.net.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.nio.Buffer;
-import javax.sound.sampled.*;
 import javax.swing.*;
 
 public class Client extends JFrame {
