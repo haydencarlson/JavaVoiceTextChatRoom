@@ -1,13 +1,10 @@
 package Client;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
-
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Vector;
 
 public class AudioSenderWorker extends Thread {
     private AudioFormat audioFormat;

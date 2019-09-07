@@ -1,7 +1,5 @@
 package Server;
 
-import Server.Server;
-
 import javax.swing.*;
 
 public class ServerMain {

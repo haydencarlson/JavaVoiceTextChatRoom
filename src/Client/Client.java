@@ -12,17 +12,10 @@ public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
 	private String username;
-	private byte[] userMessageBuffer;
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
 	private String message;
 	private String serverIP;
 	private InetAddress address;
 	private MulticastSocket connection;
-	private AudioFormat audioFormat;
-	private TargetDataLine targetDataLine;
-	private SourceDataLine sourceDataLine;
-	private int retryAttempts = 0;
 
 	public Client(String host) {
 		super("DIY Messenger Client");
