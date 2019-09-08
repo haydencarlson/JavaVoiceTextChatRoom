@@ -60,6 +60,7 @@ public class Client extends JFrame {
 		multiCastConnection = new MulticastSocket();
 		multiCastConnection.joinGroup(multiCastAddress);
 
+		// Set up datagram socket for sending text messages
 		uniCastAddress = InetAddress.getByName("127.0.0.1");
 		uniCastconnection = new DatagramSocket();
 		showMessage("You are now connected! Say Hi.");
@@ -76,9 +77,16 @@ public class Client extends JFrame {
 
 	private void sendMessage(String message) {
 		try {
+			// Create buffer to store message bytes
 			byte[] userMessageBuffer = new byte[1024];
+
+			// String to bytes
 			userMessageBuffer = message.getBytes();
+
+			// Build datagram packet to send to server
 			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, uniCastAddress, 3001);
+
+			// Send to server
 			uniCastconnection.send(packet);
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");

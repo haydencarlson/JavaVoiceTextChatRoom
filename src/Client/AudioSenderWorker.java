@@ -15,7 +15,7 @@ public class AudioSenderWorker extends Thread {
     private InetAddress address;
     private Mixer mixer;
     private DataLine.Info dataLineInfo;
-    private SourceDataLine sourceDataLine;
+
     public AudioSenderWorker(MulticastSocket connection, Client client, InetAddress address) {
         this.connection = connection;
         this.client = client;
@@ -29,13 +29,26 @@ public class AudioSenderWorker extends Thread {
 
     private void sendAudio () {
         try {
+            // Get line
             targetDataLine = (TargetDataLine) mixer.getLine(dataLineInfo);
+
+            // Open the line ready to capture with specific audio format
             targetDataLine.open(audioFormat);
+
+            // Start receiving data from line
             targetDataLine.start();
+
+            // Create buffer to store received bytes
             byte[] data = new byte[targetDataLine.getBufferSize()];
             while (true) {
+
+                // Read bytes from line
                 targetDataLine.read(data, 0, data.length);
+
+                // Build packet to send to server
                 DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 3000);
+
+                // Send to server
                 connection.send(send_packet);
             }
         } catch (IOException | LineUnavailableException e) {
@@ -43,11 +56,15 @@ public class AudioSenderWorker extends Thread {
         }
     }
 
+    // Configures audio line to use for capturing
     private void getAudioDevice() {
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         audioFormat = getAudioFormat();
         dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
-        getSupportedFormats(TargetDataLine.class);
+
+//        getSupportedFormats(TargetDataLine.class);
+
+        // Hard coded to mixer 4
         mixer = AudioSystem.getMixer(mixerInfo[4]);
     }
 
@@ -58,6 +75,7 @@ public class AudioSenderWorker extends Thread {
         return new AudioFormat(sampleRate, sampleSizeInBits, channels, true, false);
     }
 
+    // Looks for mixer line supported formats
     public void getSupportedFormats(Class<?> dataLineClass) {
         float sampleRates[] = {(float) 8000.0, (float) 16000.0, (float) 44100.0};
         int channels[] = {1, 2};

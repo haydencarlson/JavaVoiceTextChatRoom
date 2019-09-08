@@ -22,12 +22,22 @@ public class MessageReceiverWorker extends Thread {
     }
 
     private void receiveMessages () {
+
+        // Create buffer to store received message
         byte[] buf = new byte[1024];
         try {
             while (true) {
+
+                // Create a packet to store received data
                 DatagramPacket dp = new DatagramPacket(buf, buf.length);
+
+                // Receive bytes from socket
                 uniCastConnection.receive(dp);
+
+                // Convert bytes to string to be displayed
                 message = new String(dp.getData());
+
+                // Display message on client
                 this.client.showMessage("\n" + message);
             }
         } catch (IOException e) {
