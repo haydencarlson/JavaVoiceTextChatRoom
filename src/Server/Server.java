@@ -7,9 +7,8 @@ import javax.swing.*;
 public class Server extends JFrame {
     private JTextArea userMessages;
     private InetAddress address;
-    private ObjectOutputStream output;
-    private ObjectInputStream input;
-    private MulticastSocket connection;
+    private MulticastSocket multiCastConnection;
+    private DatagramSocket uniCastConnection;
 
     public Server() {
         super("DIY Instant Messenger");
@@ -25,11 +24,17 @@ public class Server extends JFrame {
 
     public void start() {
         try {
+
+            // Set up multicast group
             address = InetAddress.getByName("224.0.0.1");
-            connection = new MulticastSocket(3000);
-            connection.setReuseAddress(true);
-            connection.joinGroup(address);
-            showMessage("Server has started on: " + connection.getLocalSocketAddress());
+            multiCastConnection = new MulticastSocket(3000);
+            multiCastConnection.setReuseAddress(true);
+            multiCastConnection.joinGroup(address);
+            showMessage("\nMulticast has started on: " + multiCastConnection.getLocalSocketAddress());
+
+            // Set up unicast connection
+            uniCastConnection = new DatagramSocket(3001);
+            showMessage("\nUnicast has started on: " + uniCastConnection.getLocalSocketAddress());
             acceptNewConnections();
         } catch(IOException e) {
             e.printStackTrace();
@@ -37,8 +42,11 @@ public class Server extends JFrame {
     }
 
     private void acceptNewConnections() throws IOException {
-        ServerWorker worker = new ServerWorker(connection, address, this);
-        worker.start();
+        AudioReceiverWorker audioReceiverWorker = new AudioReceiverWorker(multiCastConnection, address, this);
+        audioReceiverWorker.start();
+
+        MessageReceiverWorker messageReceiverWorker = new MessageReceiverWorker(uniCastConnection, address, this);
+        messageReceiverWorker.start();
     }
 
     public void showMessage(final String message) {

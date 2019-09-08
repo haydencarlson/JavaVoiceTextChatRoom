@@ -11,8 +11,10 @@ public class Client extends JFrame {
 	private String username;
 	private String message;
 	private String serverIP;
-	private InetAddress address;
-	private MulticastSocket connection;
+	private InetAddress multiCastAddress;
+	private InetAddress uniCastAddress;
+	private MulticastSocket multiCastConnection;
+	private DatagramSocket uniCastconnection;
 
 	public Client(String host) {
 		super("DIY Messenger Client");
@@ -54,27 +56,30 @@ public class Client extends JFrame {
 	private void connectToServer() throws IOException {
 
 		// Connect to multicast socket and join group
-		address = InetAddress.getByName(serverIP);
-		connection = new MulticastSocket();
-		connection.joinGroup(address);
+		multiCastAddress = InetAddress.getByName(serverIP);
+		multiCastConnection = new MulticastSocket();
+		multiCastConnection.joinGroup(multiCastAddress);
+
+		uniCastAddress = InetAddress.getByName("127.0.0.1");
+		uniCastconnection = new DatagramSocket();
 		showMessage("You are now connected! Say Hi.");
 		fieldEditable(userMessage, true);
 
 		// Start thread that handles setting up receiving messages
-		Thread messageReceiverWorker = new MessageReceiverWorker(connection, this, address);
+		Thread messageReceiverWorker = new MessageReceiverWorker(uniCastconnection, this, uniCastAddress);
 		messageReceiverWorker.start();
 
 		// Start thread that handles sending audio
-		Thread audioSenderWorker = new AudioSenderWorker(connection, this, address);
+		Thread audioSenderWorker = new AudioSenderWorker(multiCastConnection, this, multiCastAddress);
 		audioSenderWorker.start();
 	}
 
 	private void sendMessage(String message) {
 		try {
-			byte[] userMessageBuffer = new byte[1000];
+			byte[] userMessageBuffer = new byte[1024];
 			userMessageBuffer = message.getBytes();
-			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, address, 3000);
-			connection.send(packet);
+			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, uniCastAddress, 3001);
+			uniCastconnection.send(packet);
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}
