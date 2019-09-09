@@ -2,6 +2,7 @@ package Server;
 
 import java.net.InetAddress;
 
+// ServerClient is an instance of a connected client to the server which is used to send data to.
 public class ServerClient {
     public InetAddress clientAddress;
     public int port;

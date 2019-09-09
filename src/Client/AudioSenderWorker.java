@@ -13,10 +13,6 @@ public class AudioSenderWorker extends Thread {
     private DatagramSocket connection;
     private Client client;
     private InetAddress address;
-    private Mixer mixer;
-    private DataLine.Info dataLineInfo;
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
 
     public AudioSenderWorker(DatagramSocket connection, Client client, InetAddress address) {
         this.connection = connection;
