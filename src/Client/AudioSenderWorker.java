@@ -42,8 +42,6 @@ public class AudioSenderWorker extends Thread {
                 // Build packet to send to server
                 DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 3001);
 
-                System.out.println("Sending audio packet: " + send_packet.getLength());
-
                 // Send to server
                 connection.send(send_packet);
             }
