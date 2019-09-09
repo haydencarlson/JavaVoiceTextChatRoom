@@ -35,7 +35,6 @@ public class ClientAudioReceiverWorker extends Thread {
         try {
             DatagramPacket receive_packet = new DatagramPacket(audioData, audioData.length);
             connection.receive(receive_packet);
-            System.out.println("Received new audio packets: " + audioData.length);
 			playAudio(audioData);
         } catch (Exception e) {
 

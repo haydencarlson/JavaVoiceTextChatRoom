@@ -71,7 +71,7 @@ public class Client extends JFrame {
 
 	private void newClientConnection() {
 		try {
-		String connectionString = "/c/";
+		    String connectionString = "/c/";
 			// Build packet to send to server
 			DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), connectionAddress, 3000);
 			// Send to server

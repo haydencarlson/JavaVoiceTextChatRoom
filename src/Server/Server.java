@@ -35,8 +35,6 @@ public class Server extends JFrame {
             audioReceiverWorker.start();
         } catch(SocketException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
