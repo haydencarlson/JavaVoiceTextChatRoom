@@ -1,5 +1,7 @@
 package Client;
 
+import Server.AudioReceiverWorker;
+
 import java.io.*;
 import java.net.*;
 import java.awt.*;
@@ -11,9 +13,9 @@ public class Client extends JFrame {
 	private String username;
 	private String message;
 	private String serverIP;
-	private InetAddress multiCastAddress;
+	private InetAddress audioSendAddress;
 	private InetAddress uniCastAddress;
-	private MulticastSocket multiCastConnection;
+	private Socket clientConnection;
 	private DatagramSocket uniCastconnection;
 
 	public Client(String host) {
@@ -55,24 +57,32 @@ public class Client extends JFrame {
 
 	private void connectToServer() throws IOException {
 
-		// Connect to multicast socket and join group
-		multiCastAddress = InetAddress.getByName(serverIP);
-		multiCastConnection = new MulticastSocket();
-		multiCastConnection.joinGroup(multiCastAddress);
+		uniCastAddress = InetAddress.getByName(serverIP);
+		uniCastconnection = new DatagramSocket();
+
+		String connectionString = "/c/";
+		// Build packet to send to server
+		DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), uniCastAddress, 3000);
+		// Send to server
+		uniCastconnection.send(send_packet);
+
+//		audioSendConnection.joinGroup(multiCastAddress);
 
 		// Set up datagram socket for sending text messages
-		uniCastAddress = InetAddress.getByName("127.0.0.1");
-		uniCastconnection = new DatagramSocket();
-		showMessage("You are now connected! Say Hi.");
-		fieldEditable(userMessage, true);
-
-		// Start thread that handles setting up receiving messages
-		Thread messageReceiverWorker = new MessageReceiverWorker(uniCastconnection, this, uniCastAddress);
-		messageReceiverWorker.start();
-
-		// Start thread that handles sending audio
-		Thread audioSenderWorker = new AudioSenderWorker(multiCastConnection, this, multiCastAddress);
+//		uniCastAddress = InetAddress.getByName("127.0.0.1");
+//		uniCastconnection = new DatagramSocket();
+//		showMessage("You are now connected! Say Hi.");
+//		fieldEditable(userMessage, true);
+//
+//		// Start thread that handles setting up receiving messages
+//		Thread messageReceiverWorker = new MessageReceiverWorker(uniCastconnection, this, uniCastAddress);
+//		messageReceiverWorker.start();
+//
+//		Start thread that handles sending audio
+		Thread audioSenderWorker = new AudioSenderWorker(uniCastconnection, this, uniCastAddress);
 		audioSenderWorker.start();
+		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(uniCastconnection, uniCastAddress, this);
+		audioReceiverWorker.start();
 	}
 
 	private void sendMessage(String message) {
