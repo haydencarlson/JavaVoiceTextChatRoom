@@ -2,40 +2,38 @@ package Client;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.*;
 
 public class AudioSenderWorker extends Thread {
     private AudioFormat audioFormat;
     private TargetDataLine targetDataLine;
     private byte tempAudioBuffer[] = new byte[1024];
-    private MulticastSocket connection;
+    private DatagramSocket connection;
     private Client client;
     private InetAddress address;
     private Mixer mixer;
     private DataLine.Info dataLineInfo;
+    private ObjectInputStream input;
+    private ObjectOutputStream output;
 
-    public AudioSenderWorker(MulticastSocket connection, Client client, InetAddress address) {
+    public AudioSenderWorker(DatagramSocket connection, Client client, InetAddress address) {
         this.connection = connection;
         this.client = client;
         this.address = address;
     }
 
     public void run() {
-        getAudioDevice();
         sendAudio();
     }
 
     private void sendAudio () {
         try {
-            // Get line
-            targetDataLine = (TargetDataLine) mixer.getLine(dataLineInfo);
 
-            // Open the line ready to capture with specific audio format
-            targetDataLine.open(audioFormat);
-
-            // Start receiving data from line
+            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, getAudioFormat());
+            targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+            targetDataLine.open(getAudioFormat());
             targetDataLine.start();
 
             // Create buffer to store received bytes
@@ -46,7 +44,9 @@ public class AudioSenderWorker extends Thread {
                 targetDataLine.read(data, 0, data.length);
 
                 // Build packet to send to server
-                DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 3000);
+                DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 3001);
+
+                System.out.println("Sending audio packet: " + send_packet.getLength());
 
                 // Send to server
                 connection.send(send_packet);
@@ -54,18 +54,6 @@ public class AudioSenderWorker extends Thread {
         } catch (IOException | LineUnavailableException e) {
             System.out.println(e);
         }
-    }
-
-    // Configures audio line to use for capturing
-    private void getAudioDevice() {
-        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-        audioFormat = getAudioFormat();
-        dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
-
-//        getSupportedFormats(TargetDataLine.class);
-
-        // Hard coded to mixer 4
-        mixer = AudioSystem.getMixer(mixerInfo[4]);
     }
 
     private AudioFormat getAudioFormat() {
