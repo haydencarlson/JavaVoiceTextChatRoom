@@ -6,16 +6,10 @@ import java.net.*;
 
 public class ClientAudioReceiverWorker extends Thread {
     private final DatagramSocket connection;
-    private InetAddress address;
-    private Client client;
-    private byte[] messageBuffer = new byte[1024];
-    private String message;
     private SourceDataLine sourceDataLine;
 
-    public ClientAudioReceiverWorker(DatagramSocket connection, InetAddress address, Client client) {
+    public ClientAudioReceiverWorker(DatagramSocket connection) {
         this.connection = connection;
-        this.client = client;
-        this.address = address;
     }
 
     public void run() {

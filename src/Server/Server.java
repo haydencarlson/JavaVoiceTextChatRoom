@@ -29,7 +29,6 @@ public class Server extends JFrame {
         try {
             uniCastSocket = new DatagramSocket(3000);
             receiveAudioSocket = new DatagramSocket(3001);
-
             NewConnectionWorker newConnectionWorker = new NewConnectionWorker(uniCastSocket, this);
             newConnectionWorker.start();
             AudioReceiverWorker audioReceiverWorker = new AudioReceiverWorker(receiveAudioSocket, this);
@@ -47,8 +46,8 @@ public class Server extends JFrame {
     }
 
 
-    public void sendToAllClients(byte[] audioData) {
-        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(uniCastSocket, this.clients, audioData);
+    public void sendToAllClients(byte[] audioData, String sentFromAddress) {
+        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(uniCastSocket, this.clients, audioData, sentFromAddress);
         audioSenderWorker.start();
     }
 

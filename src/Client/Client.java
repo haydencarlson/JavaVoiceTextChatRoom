@@ -13,10 +13,8 @@ public class Client extends JFrame {
 	private String username;
 	private String message;
 	private String serverIP;
-	private InetAddress audioSendAddress;
-	private InetAddress uniCastAddress;
-	private Socket clientConnection;
-	private DatagramSocket uniCastconnection;
+	private InetAddress connectionAddress;
+	private DatagramSocket connection;
 
 	public Client(String host) {
 		super("DIY Messenger Client");
@@ -43,46 +41,45 @@ public class Client extends JFrame {
 		setVisible(true);
 	}
 
-	public void start() {
-		try {
-			connectToServer();
-		} catch (IOException e) {
-			showMessage("\n Unable to connect at this time");
-		}
-	}
 
 	public void setUsername(String newUserName) {
 		username = newUserName;
 	}
 
-	private void connectToServer() throws IOException {
+	public void start() {
+		try {
+			// Initialize DatagramSocket socket
+			connectionAddress = InetAddress.getByName(serverIP);
+			connection = new DatagramSocket();
 
-		uniCastAddress = InetAddress.getByName(serverIP);
-		uniCastconnection = new DatagramSocket();
+			// Send packet to tell server there is a new client
+			newClientConnection();
 
+			// Start thread that handles sending audio
+			Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
+			audioSenderWorker.start();
+
+			// Thread to handle receiving audio
+			ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
+			audioReceiverWorker.start();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void newClientConnection() {
+		try {
 		String connectionString = "/c/";
-		// Build packet to send to server
-		DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), uniCastAddress, 3000);
-		// Send to server
-		uniCastconnection.send(send_packet);
+			// Build packet to send to server
+			DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), connectionAddress, 3000);
+			// Send to server
+			connection.send(send_packet);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-//		audioSendConnection.joinGroup(multiCastAddress);
-
-		// Set up datagram socket for sending text messages
-//		uniCastAddress = InetAddress.getByName("127.0.0.1");
-//		uniCastconnection = new DatagramSocket();
-//		showMessage("You are now connected! Say Hi.");
-//		fieldEditable(userMessage, true);
-//
-//		// Start thread that handles setting up receiving messages
-//		Thread messageReceiverWorker = new MessageReceiverWorker(uniCastconnection, this, uniCastAddress);
-//		messageReceiverWorker.start();
-//
-//		Start thread that handles sending audio
-		Thread audioSenderWorker = new AudioSenderWorker(uniCastconnection, this, uniCastAddress);
-		audioSenderWorker.start();
-		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(uniCastconnection, uniCastAddress, this);
-		audioReceiverWorker.start();
 	}
 
 	private void sendMessage(String message) {
@@ -94,10 +91,10 @@ public class Client extends JFrame {
 			userMessageBuffer = message.getBytes();
 
 			// Build datagram packet to send to server
-			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, uniCastAddress, 3001);
+			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, connectionAddress, 3001);
 
 			// Send to server
-			uniCastconnection.send(packet);
+			connection.send(packet);
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}
