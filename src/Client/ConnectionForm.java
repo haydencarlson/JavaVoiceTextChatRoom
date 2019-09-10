@@ -20,7 +20,7 @@ public class ConnectionForm {
     private JFrame frame;
     private ClientNewConnectionWorker clientNewConnectionWorker;
     private volatile Client client;
-    private boolean isConnected;
+    private Timer connectionCheckTimer;
 
     public ConnectionForm() {
         frame = new JFrame("Connect");
@@ -79,6 +79,10 @@ public class ConnectionForm {
     // Called by ClientNewConnectionWorker if packet is received from server
     public void connected() {
 
+        // Try to cancel scheduled timer
+        connectionCheckTimer.cancel();
+        connectionCheckTimer.purge();
+
         // Stop thread looking for connection response
         clientNewConnectionWorker.interrupt();
 
@@ -92,10 +96,9 @@ public class ConnectionForm {
 
     // Checks for client connection after 5 seconds or re enables connect button
     private void checkForConnection() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        connectionCheckTimer = new Timer();
+        connectionCheckTimer.schedule(new TimerTask() {
             public void run() {
-                System.out.println("Running");
                 if (client == null) {
                     System.out.println("Unable to connect");
                     connectButton.setEnabled(true);
