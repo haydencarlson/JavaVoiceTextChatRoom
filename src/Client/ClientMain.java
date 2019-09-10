@@ -1,11 +1,16 @@
 package Client;
 
-import javax.swing.JFrame;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class ClientMain {
-	public static void main(String[] args) {
-		Client client = new Client("192.168.1.67");
-		client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		client.start();
-	}
+    public static void main(String[] args) {
+        try {
+            InetAddress address = InetAddress.getByName("192.168.1.67");
+//            Client client = new Client(address, "Hayden");
+//            client.start();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 }

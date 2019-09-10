@@ -1,18 +1,18 @@
-package Server;
+package Client;
+
+import Server.ServerClient;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class NewConnectionWorker extends Thread {
+public class ClientNewConnectionWorker extends Thread {
     private DatagramSocket connection;
-    private Server server;
-
-    public NewConnectionWorker(DatagramSocket connection, Server server) {
+    private ConnectionForm connectionForm;
+    public ClientNewConnectionWorker(DatagramSocket connection, ConnectionForm connectionForm) {
         this.connection = connection;
-        this.server = server;
+        this.connectionForm = connectionForm;
     }
-
     public void run() {
         byte[] connectionData = new byte[1024];
         while (true) {
@@ -21,13 +21,8 @@ public class NewConnectionWorker extends Thread {
                 connection.receive(receive_packet);
                 String connectionString = new String(receive_packet.getData());
                 if (connectionString.contains("/c/")) {
-                    ServerClient newServerClient = new ServerClient(receive_packet.getAddress(), receive_packet.getPort());
-                    this.server.showMessage("\n New user connected: " + receive_packet.getAddress());
-                    this.server.addNewClient(newServerClient);
+                    connectionForm.connected();
                 }
-
-                DatagramPacket send_packet = new DatagramPacket(connectionData, connectionData.length, receive_packet.getAddress(), receive_packet.getPort());
-                connection.send(send_packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }

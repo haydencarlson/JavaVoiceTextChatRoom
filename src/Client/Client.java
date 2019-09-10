@@ -1,7 +1,5 @@
 package Client;
 
-import Server.AudioReceiverWorker;
-
 import java.io.*;
 import java.net.*;
 import java.awt.*;
@@ -11,15 +9,14 @@ public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
 	private String username;
-	private String message;
-	private String serverIP;
 	private InetAddress connectionAddress;
 	private DatagramSocket connection;
 
-	public Client(String host) {
+	public Client(InetAddress connectionAddress, String username, DatagramSocket connection) {
 		super("DIY Messenger Client");
-		serverIP = host;
-		username = "Anonymous";
+		this.username = username;
+		this.connection = connection;
+		this.connectionAddress = connectionAddress;
 		setupUI();
 	}
 
@@ -32,9 +29,8 @@ public class Client extends JFrame {
 				userMessage.setText("");
 			}
 		);
-		TopBar topbar = new TopBar(this);
-		add(topbar, BorderLayout.NORTH);
 		add(userMessage, BorderLayout.SOUTH);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		userMessages = new JTextArea();
 		add(new JScrollPane(userMessages), BorderLayout.CENTER);
 		setSize(450, 250);
@@ -42,31 +38,14 @@ public class Client extends JFrame {
 	}
 
 
-	public void setUsername(String newUserName) {
-		username = newUserName;
-	}
-
 	public void start() {
-		try {
-			// Initialize DatagramSocket socket
-			connectionAddress = InetAddress.getByName(serverIP);
-			connection = new DatagramSocket();
+		// Start thread that handles sending audio
+		Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
+		audioSenderWorker.start();
 
-			// Send packet to tell server there is a new client
-			newClientConnection();
-
-			// Start thread that handles sending audio
-			Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
-			audioSenderWorker.start();
-
-			// Thread to handle receiving audio
-			ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
-			audioReceiverWorker.start();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		// Thread to handle receiving audio
+		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
+		audioReceiverWorker.start();
 	}
 
 	private void newClientConnection() {
@@ -79,7 +58,6 @@ public class Client extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void sendMessage(String message) {

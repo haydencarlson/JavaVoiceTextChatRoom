@@ -1,11 +1,11 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="Client:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Client_jar</output-path>
-    <root id="archive" name="Chatbox.jar">
+    <root id="archive" name="Client.jar">
+      <element id="module-output" name="Chatbox" />
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/src/Client/META-INF/MANIFEST.MF" />
       </element>
-      <element id="module-output" name="Chatbox" />
     </root>
   </artifact>
 </component>
