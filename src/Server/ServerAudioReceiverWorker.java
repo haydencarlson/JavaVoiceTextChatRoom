@@ -1,13 +1,12 @@
 package Server;
 
-import javax.sound.sampled.*;
 import java.net.*;
 
-public class AudioReceiverWorker extends Thread {
+public class ServerAudioReceiverWorker extends Thread {
 	private final DatagramSocket connection;
 	private Server server;
 
-	public AudioReceiverWorker(DatagramSocket socket, Server server) {
+	public ServerAudioReceiverWorker(DatagramSocket socket, Server server) {
 		this.connection = socket;
 		this.server = server;
 	}

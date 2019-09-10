@@ -25,6 +25,9 @@ public class NewConnectionWorker extends Thread {
                     this.server.showMessage("\n New user connected: " + receive_packet.getAddress());
                     this.server.addNewClient(newServerClient);
                 }
+
+                DatagramPacket send_packet = new DatagramPacket(connectionData, connectionData.length, receive_packet.getAddress(), receive_packet.getPort());
+                connection.send(send_packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }

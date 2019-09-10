@@ -22,8 +22,6 @@ public class AudioSenderWorker extends Thread {
         for (int client = 0; client < clients.size(); client++) {
             try {
                 ServerClient serverClient = clients.get(client);
-                System.out.println(serverClient.clientAddress.getHostName());
-                System.out.println(sentFromAddress);
                 if (!serverClient.clientAddress.getHostAddress().equals(sentFromAddress)) {
                     // Build packet to send to server
                     DatagramPacket send_packet = new DatagramPacket(audioData, audioData.length, serverClient.clientAddress, serverClient.port);

@@ -31,7 +31,7 @@ public class Server extends JFrame {
             receiveAudioSocket = new DatagramSocket(3001);
             NewConnectionWorker newConnectionWorker = new NewConnectionWorker(uniCastSocket, this);
             newConnectionWorker.start();
-            AudioReceiverWorker audioReceiverWorker = new AudioReceiverWorker(receiveAudioSocket, this);
+            ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(receiveAudioSocket, this);
             audioReceiverWorker.start();
         } catch(SocketException e) {
             e.printStackTrace();
@@ -40,7 +40,6 @@ public class Server extends JFrame {
 
     public void addNewClient(ServerClient serverClient) {
         clients.add(serverClient);
-        System.out.println(clients.size());
     }
 
 
