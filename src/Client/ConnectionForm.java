@@ -7,6 +7,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.*;
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class ConnectionForm {
@@ -82,7 +83,7 @@ public class ConnectionForm {
         clientNewConnectionWorker.interrupt();
 
         // Start client
-        client = new Client(connectionAddress, usernameText.getText());
+        client = new Client(connectionAddress, usernameText.getText(), connection);
         client.start();
 
         // Hide connection form
@@ -91,17 +92,16 @@ public class ConnectionForm {
 
     // Checks for client connection after 5 seconds or re enables connect button
     private void checkForConnection() {
-        new java.util.Timer().schedule(
-            new java.util.TimerTask() {
-                public void run() {
-                    if (client == null) {
-                        System.out.println("Unable to connect");
-                        connectButton.setEnabled(true);
-                    }
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                System.out.println("Running");
+                if (client == null) {
+                    System.out.println("Unable to connect");
+                    connectButton.setEnabled(true);
                 }
-            },
-            5000
-        );
+            }
+        }, 5000);
     }
 
     public static void main(String[] args) {

@@ -12,7 +12,7 @@ public class Client extends JFrame {
 	private InetAddress connectionAddress;
 	private DatagramSocket connection;
 
-	public Client(InetAddress connectionAddress, String username) {
+	public Client(InetAddress connectionAddress, String username, DatagramSocket connection) {
 		super("DIY Messenger Client");
 		this.username = username;
 		this.connection = connection;
@@ -39,22 +39,13 @@ public class Client extends JFrame {
 
 
 	public void start() {
-		try {
-			// Initialize DatagramSocket socket
-			connection = new DatagramSocket();
-			newClientConnection();
-			// Start thread that handles sending audio
-			Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
-			audioSenderWorker.start();
+		// Start thread that handles sending audio
+		Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
+		audioSenderWorker.start();
 
-			// Thread to handle receiving audio
-			ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
-			audioReceiverWorker.start();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		// Thread to handle receiving audio
+		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
+		audioReceiverWorker.start();
 	}
 
 	private void newClientConnection() {
