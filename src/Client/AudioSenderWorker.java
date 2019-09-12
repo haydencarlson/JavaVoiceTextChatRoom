@@ -56,33 +56,4 @@ public class AudioSenderWorker extends Thread {
         int channels = 1;
         return new AudioFormat(sampleRate, sampleSizeInBits, channels, true, false);
     }
-
-    // Looks for mixer line supported formats
-    public void getSupportedFormats(Class<?> dataLineClass) {
-        float sampleRates[] = {(float) 8000.0, (float) 16000.0, (float) 44100.0};
-        int channels[] = {1, 2};
-        int bytesPerSample[] = {2};
-
-        AudioFormat format;
-        DataLine.Info lineInfo;
-
-        for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
-            for (int a = 0; a < sampleRates.length; a++) {
-                for (int b = 0; b < channels.length; b++) {
-                    for (int c = 0; c < bytesPerSample.length; c++) {
-                        format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
-                            sampleRates[a], 8 * bytesPerSample[c], channels[b], bytesPerSample[c],
-                            sampleRates[a], false);
-                        lineInfo = new DataLine.Info(dataLineClass, format);
-                        if (AudioSystem.isLineSupported(lineInfo)) {
-                            if (AudioSystem.getMixer(mixerInfo).isLineSupported(lineInfo)) {
-                                System.out.println(mixerInfo.getName());
-                                System.out.println(format);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
