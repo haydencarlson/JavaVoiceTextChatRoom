@@ -10,13 +10,15 @@ public class Client extends JFrame {
 	private JTextArea userMessages;
 	private String username;
 	private InetAddress connectionAddress;
-	private DatagramSocket connection;
+	private TCPServerConnection connection;
+	private DatagramSocket udpSocket;
 
-	public Client(InetAddress connectionAddress, String username, DatagramSocket connection) {
+	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket udpSocket) {
 		super("DIY Messenger Client");
 		this.username = username;
 		this.connection = connection;
 		this.connectionAddress = connectionAddress;
+		this.udpSocket = udpSocket;
 		setupUI();
 	}
 
@@ -40,11 +42,11 @@ public class Client extends JFrame {
 
 	public void start() {
 		// Start thread that handles sending audio
-		Thread audioSenderWorker = new AudioSenderWorker(connection, this, connectionAddress);
+		Thread audioSenderWorker = new AudioSenderWorker(udpSocket, this, connectionAddress);
 		audioSenderWorker.start();
 
 		// Thread to handle receiving audio
-		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(connection);
+		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(udpSocket);
 		audioReceiverWorker.start();
 	}
 
@@ -54,7 +56,7 @@ public class Client extends JFrame {
 			// Build packet to send to server
 			DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), connectionAddress, 3000);
 			// Send to server
-			connection.send(send_packet);
+			udpSocket.send(send_packet);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -72,7 +74,7 @@ public class Client extends JFrame {
 			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, connectionAddress, 3001);
 
 			// Send to server
-			connection.send(packet);
+			udpSocket.send(packet);
 		} catch(IOException e) {
 			userMessages.append("\n Error sending message");
 		}

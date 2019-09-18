@@ -7,8 +7,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ConnectionForm {
     private JButton connectButton;
@@ -16,11 +14,10 @@ public class ConnectionForm {
     private JTextField usernameText;
     private JPanel connectionPanel;
     private InetAddress connectionAddress;
-    private DatagramSocket connection;
+    private Socket connection;
     private JFrame frame;
-    private ClientNewConnectionWorker clientNewConnectionWorker;
+    private DatagramSocket udpSocket;
     private volatile Client client;
-    private Timer connectionCheckTimer;
 
     public ConnectionForm() {
         frame = new JFrame("Connect");
@@ -57,54 +54,31 @@ public class ConnectionForm {
         try {
             // Initialize DatagramSocket socket
             connectionAddress = InetAddress.getByName(serverIpText.getText());
-            connection = new DatagramSocket();
-            String connectionString = "/c/";
 
-            // Build packet to send to server
-            DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), connectionAddress, 3000);
+            // Init TCP Socket
+            connection = new Socket("127.0.0.1", 54540);
+            udpSocket = new DatagramSocket();
+            TCPServerConnection serverConnection = new TCPServerConnection(connection, this);
+            serverConnection.start();
 
-            // Send to server
-            connection.send(send_packet);
+            if (connection.isConnected()) {
+                System.out.println("Connected to server: " + connection.getInetAddress().getHostAddress() + ":" + connection.getPort());
+                connected(serverConnection);
+            }
 
-            clientNewConnectionWorker = new ClientNewConnectionWorker(connection, this);
-            clientNewConnectionWorker.start();
-
-            checkForConnection();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    // Called by ClientNewConnectionWorker if packet is received from server
-    public void connected() {
-
-        // Try to cancel scheduled timer
-        connectionCheckTimer.cancel();
-        connectionCheckTimer.purge();
-
-        // Stop thread looking for connection response
-        clientNewConnectionWorker.interrupt();
-
+    // Called by TCPSocketReceiver once connection is established
+    public void connected(TCPServerConnection serverConnection) {
         // Start client
-        client = new Client(connectionAddress, usernameText.getText(), connection);
+        client = new Client(connectionAddress, usernameText.getText(), serverConnection, udpSocket);
         client.start();
-
         // Hide connection form
         frame.setVisible(false);
-    }
-
-    // Checks for client connection after 5 seconds or re enables connect button
-    private void checkForConnection() {
-        connectionCheckTimer = new Timer();
-        connectionCheckTimer.schedule(new TimerTask() {
-            public void run() {
-                if (client == null) {
-                    System.out.println("Unable to connect");
-                    connectButton.setEnabled(true);
-                }
-            }
-        }, 5000);
     }
 
     public static void main(String[] args) {
