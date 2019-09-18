@@ -10,6 +10,7 @@ public class Server extends JFrame {
     private InetAddress address;
     private DatagramSocket uniCastSocket;
     private DatagramSocket receiveAudioSocket;
+    private ServerSocket serverSocket;
     private volatile ArrayList<ServerClient> clients;
 
     public Server() {
@@ -33,8 +34,22 @@ public class Server extends JFrame {
             newConnectionWorker.start();
             ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(receiveAudioSocket, this);
             audioReceiverWorker.start();
-        } catch(SocketException e) {
+
+            serverSocket = new ServerSocket(54540);
+            acceptNewConnections();
+        } catch(IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void acceptNewConnections() {
+        while(true) {
+            try {
+                Socket connection = serverSocket.accept();
+                new TCPClientConnection(connection);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
         }
     }
 
