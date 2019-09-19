@@ -12,13 +12,14 @@ public class Client extends JFrame {
 	private InetAddress connectionAddress;
 	private TCPServerConnection connection;
 	private DatagramSocket udpSocket;
-
-	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket udpSocket) {
+	private DatagramSocket socketReceive;
+	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket udpSocket, DatagramSocket socketReceive) {
 		super("DIY Messenger Client");
 		this.username = username;
 		this.connection = connection;
 		this.connectionAddress = connectionAddress;
 		this.udpSocket = udpSocket;
+		this.socketReceive = socketReceive;
 		setupUI();
 	}
 
@@ -46,20 +47,8 @@ public class Client extends JFrame {
 		audioSenderWorker.start();
 
 		// Thread to handle receiving audio
-		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(udpSocket);
+		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(socketReceive);
 		audioReceiverWorker.start();
-	}
-
-	private void newClientConnection() {
-		try {
-		    String connectionString = "/c/";
-			// Build packet to send to server
-			DatagramPacket send_packet = new DatagramPacket(connectionString.getBytes(), connectionString.length(), connectionAddress, 3000);
-			// Send to server
-			udpSocket.send(send_packet);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void sendMessage(String message) {

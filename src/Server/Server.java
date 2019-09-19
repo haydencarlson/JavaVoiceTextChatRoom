@@ -5,38 +5,26 @@ import java.net.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class Server extends JFrame {
-    private JTextArea userMessages;
-    private InetAddress address;
+public class Server {
     private DatagramSocket uniCastSocket;
     private DatagramSocket receiveAudioSocket;
     private ServerSocket serverSocket;
     private volatile ArrayList<ServerClient> clients;
 
     public Server() {
-        super("DIY Instant Messenger");
-        setupUI();
         clients = new ArrayList<ServerClient>();
-    }
-
-    private void setupUI() {
-        userMessages = new JTextArea();
-        add(new JScrollPane(userMessages));
-        setSize(300,150);
-        setVisible(true);
     }
 
     public void start() {
         try {
-            uniCastSocket = new DatagramSocket(3000);
-            receiveAudioSocket = new DatagramSocket(3001);
-            NewConnectionWorker newConnectionWorker = new NewConnectionWorker(uniCastSocket, this);
-            newConnectionWorker.start();
+            receiveAudioSocket = new DatagramSocket(54541);
             ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(receiveAudioSocket, this);
             audioReceiverWorker.start();
 
             serverSocket = new ServerSocket(54540);
+            System.out.println("Server has started");
             acceptNewConnections();
+
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -46,7 +34,9 @@ public class Server extends JFrame {
         while(true) {
             try {
                 Socket connection = serverSocket.accept();
-                new TCPClientConnection(connection);
+                ServerClient newServerClient = new ServerClient(connection.getInetAddress(), connection.getPort());
+                clients.add(newServerClient);
+                new TCPClientConnection(connection).start();
             } catch (IOException e) {
                 System.out.println(e);
             }
@@ -59,13 +49,12 @@ public class Server extends JFrame {
 
 
     public void sendToAllClients(byte[] audioData, String sentFromAddress) {
-        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(uniCastSocket, this.clients, audioData, sentFromAddress);
+        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(receiveAudioSocket, this.clients, audioData, sentFromAddress);
         audioSenderWorker.start();
     }
 
-    public void showMessage(final String message) {
-        SwingUtilities.invokeLater(
-            () -> userMessages.append(message)
-        );
+    public static void main(String[] args) {
+        Server server = new Server();
+        server.start();
     }
 }
