@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.*;
 
+// Handles connecting to server
 public class ConnectionForm {
     private JButton connectButton;
     private JTextField serverIpText;
@@ -56,14 +57,25 @@ public class ConnectionForm {
             connectionAddress = InetAddress.getByName(serverIpText.getText());
 
             // Init TCP Socket
-            connection = new Socket("127.0.0.1", 54540);
-            udpSocket = new DatagramSocket();
-            TCPServerConnection serverConnection = new TCPServerConnection(connection, this);
-            serverConnection.start();
+            connection = new Socket(connectionAddress, 54540);
 
             if (connection.isConnected()) {
+
+                // Create socket for sending
+                udpSocket = new DatagramSocket();
+
+                // Create receive socket
+                DatagramSocket socketReceive = new DatagramSocket(54541);
+
+                byte[] buf = new byte[44100];
+                DatagramPacket send_packet = new DatagramPacket(buf, buf.length, connectionAddress, 54541);
+                udpSocket.send(send_packet);
+                // Handle server messages thread
+                TCPServerConnection serverConnection = new TCPServerConnection(connection, this);
+                serverConnection.start();
+
                 System.out.println("Connected to server: " + connection.getInetAddress().getHostAddress() + ":" + connection.getPort());
-                connected(serverConnection);
+                connected(serverConnection, socketReceive);
             }
 
         } catch (IOException e) {
@@ -73,9 +85,9 @@ public class ConnectionForm {
 
 
     // Called by TCPSocketReceiver once connection is established
-    public void connected(TCPServerConnection serverConnection) {
+    public void connected(TCPServerConnection serverConnection, DatagramSocket socketReceive) {
         // Start client
-        client = new Client(connectionAddress, usernameText.getText(), serverConnection, udpSocket);
+        client = new Client(connectionAddress, usernameText.getText(), serverConnection, udpSocket, socketReceive);
         client.start();
         // Hide connection form
         frame.setVisible(false);

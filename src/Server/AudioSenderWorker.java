@@ -22,15 +22,15 @@ public class AudioSenderWorker extends Thread {
         for (int client = 0; client < clients.size(); client++) {
             try {
                 ServerClient serverClient = clients.get(client);
-                if (!serverClient.clientAddress.getHostAddress().equals(sentFromAddress)) {
-                    // Build packet to send to server
-                    DatagramPacket send_packet = new DatagramPacket(audioData, audioData.length, serverClient.clientAddress, serverClient.port);
-                    // Send to server
-                    clientConnection.send(send_packet);
-                }
+                // Build packet to send to server
+                DatagramPacket send_packet = new DatagramPacket(audioData, audioData.length, serverClient.clientAddress, 54541);
+                // Send to server
+                System.out.println("Sending audio packet to " + serverClient.clientAddress);
+                clientConnection.send(send_packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return;
     }
 }

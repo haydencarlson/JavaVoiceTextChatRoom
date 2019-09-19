@@ -40,7 +40,7 @@ public class AudioSenderWorker extends Thread {
                 targetDataLine.read(data, 0, data.length);
 
                 // Build packet to send to server
-                DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 3001);
+                DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 54541);
 
                 // Send to server
                 connection.send(send_packet);
@@ -51,7 +51,7 @@ public class AudioSenderWorker extends Thread {
     }
 
     private AudioFormat getAudioFormat() {
-        
+
         float sampleRate = 44100.0F;
         int sampleSizeInBits = 16;
         int channels = 1;
