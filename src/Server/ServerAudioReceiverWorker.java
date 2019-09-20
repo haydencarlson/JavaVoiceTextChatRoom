@@ -27,7 +27,9 @@ public class ServerAudioReceiverWorker extends Thread {
 			DatagramPacket receive_packet = new DatagramPacket(audioData, audioData.length);
 			connection.receive(receive_packet);
 			System.out.println("Received new packet from: " + receive_packet.getAddress().getHostAddress());
-			this.server.sendToAllClients(audioData, receive_packet.getAddress().getHostAddress());
+            ServerClient newServerClient = new ServerClient(receive_packet.getAddress(), receive_packet.getPort());
+            server.addNewClient(newServerClient);
+			this.server.sendToAllClients(audioData, receive_packet.getAddress().getHostAddress(), receive_packet.getPort());
 		} catch (Exception e) {
 
 		}
