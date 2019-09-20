@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class Server {
-    private DatagramSocket uniCastSocket;
-    private DatagramSocket receiveAudioSocket;
+    private DatagramSocket udpSocket;
     private ServerSocket serverSocket;
     private volatile ArrayList<ServerClient> clients;
 
@@ -17,8 +16,12 @@ public class Server {
 
     public void start() {
         try {
-            receiveAudioSocket = new DatagramSocket(54541);
-            ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(receiveAudioSocket, this);
+            udpSocket = new DatagramSocket(54541);
+
+//            NewUDPClient newUDPClient = new NewUDPClient(udpSocket, this);
+//            newUDPClient.start();
+
+            ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(udpSocket, this);
             audioReceiverWorker.start();
 
             serverSocket = new ServerSocket(54540);
@@ -34,8 +37,6 @@ public class Server {
         while(true) {
             try {
                 Socket connection = serverSocket.accept();
-                ServerClient newServerClient = new ServerClient(connection.getInetAddress(), connection.getPort());
-                clients.add(newServerClient);
                 new TCPClientConnection(connection).start();
             } catch (IOException e) {
                 System.out.println(e);
@@ -44,12 +45,24 @@ public class Server {
     }
 
     public void addNewClient(ServerClient serverClient) {
-        clients.add(serverClient);
+
+        boolean found = false;
+        for (int i = 0; i < this.clients.size(); i++) {
+            ServerClient client = this.clients.get(i);
+            if (client.clientAddress.equals(serverClient.clientAddress) && client.port == serverClient.port) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("New client connected" + serverClient.clientAddress + " Port: " + serverClient.port);
+            clients.add(serverClient);
+        }
     }
 
 
-    public void sendToAllClients(byte[] audioData, String sentFromAddress) {
-        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(receiveAudioSocket, this.clients, audioData, sentFromAddress);
+    public void sendToAllClients(byte[] audioData, String sentFromAddress, int sentFromPort) {
+        AudioSenderWorker audioSenderWorker = new AudioSenderWorker(udpSocket, this.clients, audioData, sentFromAddress, sentFromPort);
         audioSenderWorker.start();
     }
 

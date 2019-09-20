@@ -25,13 +25,6 @@ public class Client extends JFrame {
 
 	private void setupUI() {
 		userMessage = new JTextField();
-		userMessage.setEditable(false);
-		userMessage.addActionListener(
-			e -> {
-				sendMessage(e.getActionCommand());
-				userMessage.setText("");
-			}
-		);
 		add(userMessage, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		userMessages = new JTextArea();
@@ -43,30 +36,12 @@ public class Client extends JFrame {
 
 	public void start() {
 		// Start thread that handles sending audio
-		Thread audioSenderWorker = new AudioSenderWorker(udpSocket, this, connectionAddress);
+		Thread audioSenderWorker = new AudioSenderWorker(socketReceive, this, connectionAddress);
 		audioSenderWorker.start();
 
 		// Thread to handle receiving audio
 		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(socketReceive);
 		audioReceiverWorker.start();
-	}
-
-	private void sendMessage(String message) {
-		try {
-			// Create buffer to store message bytes
-			byte[] userMessageBuffer = new byte[1024];
-
-			// String to bytes
-			userMessageBuffer = message.getBytes();
-
-			// Build datagram packet to send to server
-			DatagramPacket packet = new DatagramPacket(userMessageBuffer, userMessageBuffer.length, connectionAddress, 3001);
-
-			// Send to server
-			udpSocket.send(packet);
-		} catch(IOException e) {
-			userMessages.append("\n Error sending message");
-		}
 	}
 
 	public void showMessage(final String message) {

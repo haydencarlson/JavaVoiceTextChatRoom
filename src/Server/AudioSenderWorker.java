@@ -10,23 +10,29 @@ public class AudioSenderWorker extends Thread {
     private DatagramSocket clientConnection;
     private byte[] audioData;
     private String sentFromAddress;
+    private int sentFromPort;
 
-    public AudioSenderWorker(DatagramSocket clientConnection, ArrayList<ServerClient> clients, byte[] audioData, String sentFromAddress) {
+    public AudioSenderWorker(DatagramSocket clientConnection, ArrayList<ServerClient> clients, byte[] audioData, String sentFromAddress, int sentFromPort) {
         this.clients = clients;
         this.audioData = audioData;
         this.clientConnection = clientConnection;
         this.sentFromAddress = sentFromAddress;
+        this.sentFromPort = sentFromPort;
     }
 
     public void run() {
         for (int client = 0; client < clients.size(); client++) {
             try {
                 ServerClient serverClient = clients.get(client);
-                // Build packet to send to server
-                DatagramPacket send_packet = new DatagramPacket(audioData, audioData.length, serverClient.clientAddress, 54541);
-                // Send to server
-                System.out.println("Sending audio packet to " + serverClient.clientAddress);
-                clientConnection.send(send_packet);
+                if (!serverClient.clientAddress.getHostAddress().equals(sentFromAddress)
+                    || serverClient.clientAddress.getHostAddress().equals(sentFromAddress)
+                    && serverClient.port != sentFromPort ) {
+                    // Build packet to send to server
+                    DatagramPacket send_packet = new DatagramPacket(audioData, audioData.length, serverClient.clientAddress, serverClient.port);
+                    // Send to server
+                    System.out.println("Sending audio packet to " + serverClient.clientAddress + "port: " + serverClient.port);
+                    clientConnection.send(send_packet);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -34,3 +40,4 @@ public class AudioSenderWorker extends Thread {
         return;
     }
 }
+
