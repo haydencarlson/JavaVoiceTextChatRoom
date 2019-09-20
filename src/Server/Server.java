@@ -16,18 +16,19 @@ public class Server {
 
     public void start() {
         try {
+            // This is used for receiving and sending audio
             udpSocket = new DatagramSocket(54541);
 
-//            NewUDPClient newUDPClient = new NewUDPClient(udpSocket, this);
-//            newUDPClient.start();
-
+            // Handles receiving audio from clients, and processing it
             ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(udpSocket, this);
             audioReceiverWorker.start();
 
+            // TCP Socket for session management
             serverSocket = new ServerSocket(54540);
             System.out.println("Server has started");
-            acceptNewConnections();
 
+            // Loop to accept new TCP connections
+            acceptNewConnections();
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -45,7 +46,7 @@ public class Server {
     }
 
     public void addNewClient(ServerClient serverClient) {
-
+        // Look through client list
         boolean found = false;
         for (int i = 0; i < this.clients.size(); i++) {
             ServerClient client = this.clients.get(i);
@@ -53,7 +54,7 @@ public class Server {
                 found = true;
             }
         }
-
+        // Add to list if it doesn't exist
         if (!found) {
             System.out.println("New client connected" + serverClient.clientAddress + " Port: " + serverClient.port);
             clients.add(serverClient);
