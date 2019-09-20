@@ -14,15 +14,7 @@ public class TCPClientConnection extends Thread {
     public void run() {
         try {
             RTSPBufferedReader = new BufferedReader(new InputStreamReader(this.connection.getInputStream()));
-            while (true) {
-                RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(this.connection.getOutputStream()));
-
-                RTSPBufferedWriter.write("RTSP/1.0 200 OK");
-                RTSPBufferedWriter.write("CSeq: ");
-                RTSPBufferedWriter.write("Session: ");
-                RTSPBufferedWriter.flush();
-            }
-
+            RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(this.connection.getOutputStream()));
         } catch (IOException e) {
             System.out.println(e);
         }

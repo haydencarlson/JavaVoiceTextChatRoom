@@ -70,6 +70,7 @@ public class ConnectionForm {
                 byte[] buf = new byte[44100];
                 DatagramPacket send_packet = new DatagramPacket(buf, buf.length, connectionAddress, 54541);
                 udpSocket.send(send_packet);
+
                 // Handle server messages thread
                 TCPServerConnection serverConnection = new TCPServerConnection(connection, this);
                 serverConnection.start();
