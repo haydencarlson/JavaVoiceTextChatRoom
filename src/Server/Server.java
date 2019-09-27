@@ -19,9 +19,9 @@ public class Server {
             // This is used for receiving and sending audio
             udpSocket = new DatagramSocket(54541);
 
-            // Handles receiving audio from clients, and processing it
-            ServerAudioReceiverWorker audioReceiverWorker = new ServerAudioReceiverWorker(udpSocket, this);
-            audioReceiverWorker.start();
+            // Handles receiving packets from clients, and processing it
+            ReceivePackets receivePackets = new ReceivePackets(udpSocket, this);
+            receivePackets.start();
 
             // TCP Socket for session management
             serverSocket = new ServerSocket(54540);
