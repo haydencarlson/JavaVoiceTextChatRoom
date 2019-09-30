@@ -11,14 +11,12 @@ public class Client extends JFrame {
 	private String username;
 	private InetAddress connectionAddress;
 	private TCPServerConnection connection;
-	private DatagramSocket udpSocket;
 	private DatagramSocket socketReceive;
-	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket udpSocket, DatagramSocket socketReceive) {
+	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket socketReceive) {
 		super("DIY Messenger Client");
 		this.username = username;
 		this.connection = connection;
 		this.connectionAddress = connectionAddress;
-		this.udpSocket = udpSocket;
 		this.socketReceive = socketReceive;
 		setupUI();
 	}
