@@ -78,7 +78,9 @@ public class ConnectionForm {
                 System.out.println("Connected to server: " + connection.getInetAddress().getHostAddress() + ":" + connection.getPort());
                 connected(serverConnection, socketReceive);
             }
-
+        } catch (ConnectException e) {
+           System.out.println("Unable to connect to server: " + connectionAddress + ":54540");
+           connectButton.setEnabled(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +90,7 @@ public class ConnectionForm {
     // Called by TCPSocketReceiver once connection is established
     public void connected(TCPServerConnection serverConnection, DatagramSocket socketReceive) {
         // Start client
-        client = new Client(connectionAddress, usernameText.getText(), serverConnection, udpSocket, socketReceive);
+        client = new Client(connectionAddress, usernameText.getText(), serverConnection, socketReceive);
         client.start();
         // Hide connection form
         frame.setVisible(false);
