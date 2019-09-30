@@ -78,7 +78,9 @@ public class ConnectionForm {
                 System.out.println("Connected to server: " + connection.getInetAddress().getHostAddress() + ":" + connection.getPort());
                 connected(serverConnection, socketReceive);
             }
-
+        } catch (ConnectException e) {
+           System.out.println("Unable to connect to server: " + connectionAddress + ":54540");
+           connectButton.setEnabled(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
