@@ -36,9 +36,18 @@ public class TCPServerConnection extends Thread {
         try {
             RTSPBufferReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             RTSPBufferWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-            RTSPBufferWriter.flush();
         } catch (IOException e) {
             System.out.println(e);
+        }
+    }
+
+    public void send() {
+        try {
+            RTSPBufferWriter.write("TEST");
+            RTSPBufferWriter.newLine();
+            RTSPBufferWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

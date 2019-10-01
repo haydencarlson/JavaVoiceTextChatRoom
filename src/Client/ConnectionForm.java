@@ -87,7 +87,6 @@ public class ConnectionForm {
     }
 
 
-    // Called by TCPSocketReceiver once connection is established
     public void connected(TCPServerConnection serverConnection, DatagramSocket socketReceive) {
         // Start client
         client = new Client(connectionAddress, usernameText.getText(), serverConnection, socketReceive);
