@@ -1,5 +1,7 @@
 package Client;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
 import java.awt.*;
@@ -29,6 +31,15 @@ public class Client extends JFrame {
 		add(new JScrollPane(userMessages), BorderLayout.CENTER);
 		setSize(450, 250);
 		setVisible(true);
+		addListeners();
+	}
+
+	private void addListeners() {
+		userMessage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				connection.send();
+			}
+		});
 	}
 
 
