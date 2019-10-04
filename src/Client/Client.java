@@ -10,6 +10,7 @@ import javax.swing.*;
 public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
+	private JList userList;
 	private String username;
 	private InetAddress connectionAddress;
 	private TCPServerConnection connection;
@@ -27,9 +28,11 @@ public class Client extends JFrame {
 		userMessage = new JTextField();
 		add(userMessage, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		userList = new JList();
+		add(userList, BorderLayout.LINE_END);
 		userMessages = new JTextArea();
 		add(new JScrollPane(userMessages), BorderLayout.CENTER);
-		setSize(450, 250);
+		setSize(600, 300);
 		setVisible(true);
 		addListeners();
 	}
