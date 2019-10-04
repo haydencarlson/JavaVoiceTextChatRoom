@@ -11,6 +11,7 @@ public class Client extends JFrame {
 	private JTextField userMessage;
 	private JTextArea userMessages;
 	private JList userList;
+	private DefaultListModel userListModel;
 	private String username;
 	private InetAddress connectionAddress;
 	private TCPServerConnection connection;
@@ -25,15 +26,25 @@ public class Client extends JFrame {
 	}
 
 	private void setupUI() {
-		userMessage = new JTextField();
-		add(userMessage, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		userList = new JList();
-		add(userList, BorderLayout.LINE_END);
-		userMessages = new JTextArea();
-		add(new JScrollPane(userMessages), BorderLayout.CENTER);
 		setSize(600, 300);
 		setVisible(true);
+
+		// User message text field
+		userMessage = new JTextField();
+		add(userMessage, BorderLayout.SOUTH);
+
+		// User messages box
+		userMessages = new JTextArea();
+		add(new JScrollPane(userMessages), BorderLayout.CENTER);
+
+		// Online user list
+		userListModel = new DefaultListModel();
+		userListModel.addElement("Online Users");
+		userList = new JList(userListModel);
+		userList.setPreferredSize(new Dimension(150, 200));
+		add(userList, BorderLayout.LINE_END);
+
 		addListeners();
 	}
 
