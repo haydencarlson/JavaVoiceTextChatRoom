@@ -67,7 +67,9 @@ public class ConnectionForm {
                 // Create receive socket
                 DatagramSocket socketReceive = new DatagramSocket();
 
-                byte[] buf = new byte[44100];
+
+                byte[] buf =  ("/newuser/" + usernameText.getText()).getBytes();
+
                 DatagramPacket send_packet = new DatagramPacket(buf, buf.length, connectionAddress, 54541);
                 socketReceive.send(send_packet);
 
