@@ -38,7 +38,7 @@ public class AudioSenderWorker extends Thread {
 
                 // Read bytes from line
                 targetDataLine.read(data, 0, data.length);
-
+                System.out.println(data.length);
                 // Build packet to send to server
                 DatagramPacket send_packet = new DatagramPacket(data, data.length, address, 54541);
 
