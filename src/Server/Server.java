@@ -8,7 +8,7 @@ import javax.swing.*;
 public class Server {
     private DatagramSocket udpSocket;
     private ServerSocket serverSocket;
-    private volatile ArrayList<ServerClient> clients;
+    public volatile ArrayList<ServerClient> clients;
 
     public Server() {
         clients = new ArrayList<ServerClient>();
