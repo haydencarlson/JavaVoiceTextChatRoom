@@ -17,7 +17,7 @@ public class Client extends JFrame {
 	private TCPServerConnection connection;
 	private DatagramSocket socketReceive;
 	public Client(InetAddress connectionAddress, String username, TCPServerConnection connection, DatagramSocket socketReceive) {
-		super("DIY Messenger Client");
+		super("JavaVoiceTextChatRoom");
 		this.username = username;
 		this.connection = connection;
 		this.connectionAddress = connectionAddress;
