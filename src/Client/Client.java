@@ -62,9 +62,9 @@ public class Client extends JFrame {
 		Thread audioSenderWorker = new AudioSenderWorker(socketReceive, this, connectionAddress);
 		audioSenderWorker.start();
 
-		// Thread to handle receiving audio
-		ClientAudioReceiverWorker audioReceiverWorker = new ClientAudioReceiverWorker(socketReceive);
-		audioReceiverWorker.start();
+		// Thread to handle receiving UDP packets
+		ClientReceivePackets receivePackets = new ClientReceivePackets(socketReceive, this);
+		receivePackets.start();
 	}
 
 	public void showMessage(final String message) {
