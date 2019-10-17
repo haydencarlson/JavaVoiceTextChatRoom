@@ -3,7 +3,6 @@ package Server;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import javax.swing.*;
 
 public class Server {
     private DatagramSocket udpSocket;
@@ -20,7 +19,7 @@ public class Server {
             udpSocket = new DatagramSocket(54541);
 
             // Handles receiving packets from clients, and processing it
-            ReceivePackets receivePackets = new ReceivePackets(udpSocket, this);
+            ServerReceivePackets receivePackets = new ServerReceivePackets(udpSocket, this);
             receivePackets.start();
 
             // TCP Socket for session management
