@@ -3,11 +3,11 @@ package Server;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class ReceivePackets extends Thread {
+public class ServerReceivePackets extends Thread {
     private DatagramSocket connection;
     private Server server;
 
-    public ReceivePackets(DatagramSocket socket, Server server) {
+    public ServerReceivePackets(DatagramSocket socket, Server server) {
         this.connection = socket;
         this.server = server;
     }
@@ -26,7 +26,7 @@ public class ReceivePackets extends Thread {
                 System.out.println("Received new packet from: " + receivePacket.getAddress().getHostAddress());
 
                 // Run ProcessReceived worker to handle new data
-                new ProcessReceived(server, receiveData, receivePacket).start();
+                new ServerProcessReceived(server, receiveData, receivePacket).start();
             } catch (Exception e) {
                 System.out.println(e);
             }

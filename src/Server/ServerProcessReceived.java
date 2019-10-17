@@ -2,11 +2,11 @@ package Server;
 
 import java.net.DatagramPacket;
 
-public class ProcessReceived extends Thread {
+public class ServerProcessReceived extends Thread {
     private byte[] receiveData;
     private DatagramPacket receivePacket;
     private Server server;
-    ProcessReceived(Server server, byte[] receiveData, DatagramPacket receivePacket) {
+    ServerProcessReceived(Server server, byte[] receiveData, DatagramPacket receivePacket) {
         this.receiveData = receiveData;
         this.receivePacket = receivePacket;
         this.server = server;
